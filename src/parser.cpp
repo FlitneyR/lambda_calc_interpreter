@@ -13,8 +13,9 @@ std::unique_ptr<P> Parser<P>::parse(std::string& source)
 {
     const char* c_source = source.c_str();
     auto result = parse(c_source);
-    remove_leading_whitespace(c_source);
 
+    /// Check if the whole string was parsed, if not, fail
+    remove_leading_whitespace(c_source);
     if (&*c_source == &*source.end())
     {
         source = std::string(c_source);
@@ -139,20 +140,6 @@ std::unique_ptr<AST::WhereExpr> AST::WhereExpr::parse(const char*& source)
     } while (match_exact_string(source, ","));
 
     return dynamic_pointer_cast<AST::WhereExpr>(std::move(expression));
-}
-
-std::unique_ptr<AST::Expression> AST::WhereExpr::getInnerMostExpression() const
-{
-    if (auto whereExpr = dynamic_cast<AST::WhereExpr*>(expr.get()))
-        return whereExpr->getInnerMostExpression();
-    else return expr->getExpressionCopy();
-}
-
-void AST::WhereExpr::setInnerMostExpression(std::unique_ptr<AST::Expression> newExpr)
-{
-    if (auto whereExpr = dynamic_cast<AST::WhereExpr*>(expr.get()))
-        whereExpr->setInnerMostExpression(std::move(newExpr));
-    else expr = std::move(newExpr);
 }
 
 std::unique_ptr<AST::LetExpr> AST::LetExpr::parse(const char*& source)

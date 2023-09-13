@@ -8,6 +8,8 @@ int main(const int argc, const char** const argv)
 {
     using namespace LambdaCalc;
 
+    // Parse command line arguments
+
     bool interactiveMode = false;
     bool runMain = false;
 
@@ -20,15 +22,18 @@ int main(const int argc, const char** const argv)
             if (s == "-i" || s == "--interactive") interactiveMode = true;
             if (s == "-r" || s == "--run") runMain = true;
         }
-        else
+        else // Add running the file to the initial program string
             instructions << "#include " << '"' << argv[i] << '"' << std::endl;
     }
 
+    // Add call to run Main, if requested
     if (runMain) instructions << "Main" << std::endl;
 
+    // Run included files
     StreamInterpreter includesInterpreter(instructions);
     BindingTable fileBindings = includesInterpreter.run();
 
+    // Start interactive repl, if requested
     if (interactiveMode)
         Repl().run(fileBindings, includesInterpreter.includes);
 

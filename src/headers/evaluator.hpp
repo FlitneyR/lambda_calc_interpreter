@@ -17,10 +17,4 @@ public:
     {}
 };
 
-std::unique_ptr<AST::Expression> substitute(
-    std::unique_ptr<AST::Expression> expr,
-    const std::string& name,
-    const AST::Expression& with
-);
-
 }

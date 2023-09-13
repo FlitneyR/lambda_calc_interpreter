@@ -13,38 +13,13 @@
 namespace LambdaCalc
 {
 
-BindingTable Interpreter::run(const BindingTable& initialBindings)
-{
-    bindings.clear();
-
-    for (const auto& pair : initialBindings)
-        bindings[pair.first] = pair.second->getExpressionCopy();
-
-    return run();
-}
-
-BindingTable Interpreter::run(const std::unordered_set<std::string>& initialIncludes)
-{
-    includes = initialIncludes;
-    return run();
-}
-
 BindingTable Interpreter::run(
-    const BindingTable& initialBindings,
-    const std::unordered_set<std::string>& initialIncludes
+    const BindingTable* const initialBindings,
+    const std::unordered_set<std::string>* const initialIncludes
 ) {
-    bindings.clear();
+    if (initialBindings) bindings = *initialBindings;
+    if (initialIncludes) includes = *initialIncludes;
 
-    for (const auto& pair : initialBindings)
-        bindings[pair.first] = pair.second->getExpressionCopy();
-    
-    includes = initialIncludes;
-
-    return run();
-}
-
-BindingTable Interpreter::run()
-{
     while (!end())
     {
         auto source = read();
@@ -93,7 +68,7 @@ BindingTable Interpreter::run()
             }
 
             StreamInterpreter file_interpreter(include_file);
-            BindingTable new_bindings = file_interpreter.run(includes);
+            BindingTable new_bindings = file_interpreter.run(&includes);
 
             for (const auto& entry : new_bindings)
             {
@@ -112,11 +87,7 @@ BindingTable Interpreter::run()
         }
     }
 
-    // we need to explicitly copy each unique_ptr's content
-    BindingTable results;
-    for (const auto& pair : bindings)
-        results[pair.first] = pair.second->getExpressionCopy();
-    return results;
+    return bindings;
 }
 
 std::string StreamInterpreter::read()
@@ -140,42 +111,31 @@ std::string StreamInterpreter::read()
 }
 
 void StreamInterpreter::print(std::string message)
-{ std::cout << message << std::endl; }
+{ output << message << std::endl; }
 
 void StreamInterpreter::print_error(std::string message)
-{ std::cerr << message << std::endl; }
+{ error << message << std::endl; }
 
 bool StreamInterpreter::end()
 { return input.eof(); }
 
 std::string Repl::read()
 {
-    output << ">>> ";
-    std::string source;
+    output << ">>> " << std::flush;
 
-    const static char* whitespace = " \n\r\v\t";
-
-    while(!end())
-    {
-        std::string line;
-        std::getline(input, line);
-        source += line;
-
-        std::size_t index = source.find_last_not_of(whitespace);
-        if (source[index] != '\\') break;
-        source.erase(index);
-    }
-
-    return source;
+    return StreamInterpreter::read();
 }
 
 void Repl::print(std::string message)
-{ output << message << "\n" << std::endl; }
+{
+    StreamInterpreter::print(message);
+    output << "\n";
+}
 
 void Repl::print_error(std::string message)
-{ error << message << "\n" << std::endl; }
-
-bool Repl::end()
-{ return input.eof(); }
+{
+    StreamInterpreter::print_error(message);
+    output << "\n";
+}
 
 }

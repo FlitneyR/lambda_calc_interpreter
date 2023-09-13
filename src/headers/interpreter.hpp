@@ -10,24 +10,39 @@
 namespace LambdaCalc
 {
 
+/// @brief An interface for a lambda-calculus interpreter.
 class Interpreter
 {
 public:
     BindingTable bindings;
     std::unordered_set<std::string> includes;
 
-    BindingTable run();
-    BindingTable run(const BindingTable& initialBindings);
-    BindingTable run(const std::unordered_set<std::string>& initialIncludes);
-    BindingTable run(const BindingTable& initialBindings, const std::unordered_set<std::string>& initialIncludes);
+    /// @brief Runs the interpreter
+    /// @param initialBindings The variables already bound in the enclosing scope
+    /// @param initialIncludes The files already included, which should not be included again
+    /// @return The new variables bound while running the interpreter.
+    BindingTable run(
+        const BindingTable* const initialBindings = nullptr,
+        const std::unordered_set<std::string>* const initialIncludes = nullptr
+    );
 
 protected:
+
+    /// @brief Read a line of code to interpret
     virtual std::string read() = 0;
+
+    /// @brief Print a successful result of an expression
     virtual void print(std::string message) = 0;
+    
+    /// @brief Print an error message
     virtual void print_error(std::string error) = 0;
+
+    /// @brief Determine if the end of the code has been reached
+    /// @return True if there is no more code to interpret
     virtual bool end() = 0;
 };
 
+/// @brief 
 class StreamInterpreter : public Interpreter
 {
 protected:
@@ -37,17 +52,13 @@ protected:
 
 public:
     StreamInterpreter(
-        std::istream& input,
-        std::ostream& output,
-        std::ostream& error
+        std::istream& input = std::cin,
+        std::ostream& output = std::cout,
+        std::ostream& error = std::cerr
     ) : input(input),
         output(output),
         error(error)
     {}
-
-    StreamInterpreter(std::istream& input) : StreamInterpreter(input, std::cout, std::cerr) {}
-
-    StreamInterpreter() : StreamInterpreter(std::cin, std::cout, std::cerr) {}
 
 protected:
     std::string read() override;
@@ -58,28 +69,17 @@ protected:
 
 class Repl : public StreamInterpreter
 {
-protected:
-    std::istream& input;
-    std::ostream& output;
-    std::ostream& error;
-
 public:
     Repl(
-        std::istream& input,
-        std::ostream& output,
-        std::ostream& error
-    ) : input(input),
-        output(output),
-        error(error)
-    {}
-
-    Repl() : Repl(std::cin, std::cout, std::cerr) {}
+        std::istream& input = std::cin,
+        std::ostream& output = std::cout,
+        std::ostream& error = std::cerr
+    ) : StreamInterpreter(input, output, error) {}
 
 protected:
     std::string read() override;
     void print(std::string message) override;
     void print_error(std::string message) override;
-    bool end() override;
 };
 
 }

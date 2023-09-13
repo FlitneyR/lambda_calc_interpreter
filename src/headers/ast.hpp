@@ -5,6 +5,7 @@
 #include <unordered_set>
 
 #include "parser.hpp"
+#include "util.hpp"
 
 namespace LambdaCalc::AST
 {
@@ -18,19 +19,6 @@ class SimpleExpr;
 class Name;
 class String;
 class BracketExpr;
-
-}
-
-namespace LambdaCalc
-{
-typedef std::unordered_map<
-    std::string,
-    std::unique_ptr<AST::Expression>
-> BindingTable;
-}
-
-namespace LambdaCalc::AST
-{
 
 const std::unordered_set<std::string> keywords {
     "let",
@@ -84,18 +72,27 @@ public:
 
     Expression() {}
 
+    /// @return A base class unique_ptr to a copy of any concrete expression
     virtual std::unique_ptr<Expression> getExpressionCopy() const = 0;
 
+    /// @brief Simplify this expression. Only call this function when evaluating
+    /// @return A unique_ptr to a simplified copy of this expression
     virtual std::unique_ptr<Expression> simplify(
         const BindingTable& bindings
     ) const;
 
+    /// @brief Substitute a name with an expression in this expression
+    /// @return A unique_ptr to a copy of this expression, with the
+    ///         substitution made. 
     virtual std::unique_ptr<Expression> substitute(
         std::string name,
         const Expression& expr
     ) const = 0;
 };
 
+/// @brief An expression that defines a local binding for use only in the expression.
+///        Note that these are one time replacements.
+///        If they refer to names in the bindings, that name will not be recognised
 class WhereExpr : public Expression
 {
 public:
@@ -130,11 +127,11 @@ public:
         std::string name,
         const Expression& expr
     ) const override;
-
-    void setInnerMostExpression(std::unique_ptr<Expression> newExpr);
-    std::unique_ptr<Expression> getInnerMostExpression() const;
 };
 
+/// @brief Similar to a WhereExpr, but these bindings are simplified ahead of time.
+///        Useful if you want to precalculate something to avoid calculating it twice.
+///        But use with caution, as these can lead to infinite recursion if you are not careful
 class LetExpr : public Expression
 {
 public:
