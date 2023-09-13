@@ -4,7 +4,7 @@ A simple lambda calculus repl interpreter.
 
 ## Basic Language Grammar
 
-$$
+```math
 \begin{align}
 
 line ::=&\ binding\ |\ expr\\
@@ -19,7 +19,7 @@ appExpr ::=&\ simpleExpr\\
 simpleExpr ::=&\ name\ |\ "string"\ |\ (expr)\ |\ \$\ expr\\
 
 \end{align}
-$$
+```
 
 A $name$ is defined as any alphanumeric string, but can also contain `:` and `_`.\
 A $string$ is defined as any string that does not contain `"`.
