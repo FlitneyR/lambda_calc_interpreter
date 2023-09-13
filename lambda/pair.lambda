@@ -1,0 +1,17 @@
+/// Pair: Stores two options
+///
+/// Pair a b: Constructs a pair
+/// Fst: Gets the first value
+/// Snd: Gets the second value
+
+/// === Pair Constructors ===
+Pair = a -> b -> selection -> selection a b
+
+/// === Pair Operations ===
+Pair::Fst = pair -> pair (a -> b -> a)
+Pair::Snd = pair -> pair (a -> b -> b)
+
+/// === Pair Print ===
+Pair::Print = fstPrint -> sndPrint -> pair -> "(" fst ", " snd ")" \
+    where   fst = fstPrint $ Pair::Fst pair \
+        ,   snd = sndPrint $ Pair::Snd pair

@@ -1,0 +1,6 @@
+id = x -> x
+
+#include "bool"
+#include "pair"
+#include "list"
+#include "natural"

@@ -1,0 +1,70 @@
+/// Natural number: Repeats an opertion on an argument that number of times
+///
+/// 0: Enact the operation 0 times
+/// Incr n: Enact the operation n times, then once more
+///
+/// 0 f x === x 
+/// 1 f x === f x
+/// 2 f x === f (f x)
+/// 3 f x === f (f (f x))
+/// ...
+/// (Incr n) f x === f (n f x)
+/// etc.
+
+#include "pair"
+#include "bool"
+#include "list"
+
+/// === Nat Constructors ===
+0 = f -> x -> x
+Nat::Incr = n -> f -> x -> f (n f x)
+
+1 = Nat::Incr 0
+2 = Nat::Incr 1
+3 = Nat::Incr 2
+4 = Nat::Incr 3
+5 = Nat::Incr 4
+6 = Nat::Incr 5
+7 = Nat::Incr 6
+8 = Nat::Incr 7
+9 = Nat::Incr 8
+10 = Nat::Incr 9
+
+/// === Nat Operations ===
+Nat::IsEven = n -> n Bool::Not Bool::True
+Nat::IsZero = n -> n (_ -> Bool::False) Bool::True
+Nat::IsPositive = n -> Bool::Not $ Nat::IsZero n
+
+Nat::Add = a -> b -> a Nat::Incr b
+Nat::Mult = a -> b -> a (Nat::Add b) 0
+
+Nat::Decr = (n -> Pair::Fst $ n incrementPair $ Pair 0 0) \
+    where   incrementPair = pair -> Pair (Pair::Snd pair) $ Nat::Incr $ Pair::Snd pair
+
+Nat::Sub = a -> b -> b Nat::Decr a
+Nat::Greater = a -> b -> Nat::IsPositive $ Nat::Sub a b
+Nat::Less = a -> b -> Nat::IsPositive $ Nat::Sub b a
+Nat::Equal = a -> b -> Bool::Nor (Nat::Greater a b) (Nat::Less a b)
+
+Nat::Div = a -> b -> (Nat::Less a b) 0 $ Nat::Incr $ Nat::Div (Nat::Sub a b) b
+Nat::Rem = a -> b -> (Nat::Less a b) a $ Nat::Rem (Nat::Sub a b) b
+
+/// === Natural Print ===
+Nat::FastPrint = n -> n "+" "0"
+Nat::PrettyPrint = (n -> (Nat::Less n 10) digitString combinedStrings) \
+    where   digitString = List::Get n Nat::Digits \
+        ,   combinedStrings = (Nat::PrettyPrint (Nat::Div n 10)) (Nat::PrettyPrint (Nat::Rem n 10))
+
+Nat::Digits = \
+    $ List::And "0" \
+    $ List::And "1" \
+    $ List::And "2" \
+    $ List::And "3" \
+    $ List::And "4" \
+    $ List::And "5" \
+    $ List::And "6" \
+    $ List::And "7" \
+    $ List::And "8" \
+    $ List::And "9"
+
+Nat::All = List::RepeatApply Nat::Incr 0

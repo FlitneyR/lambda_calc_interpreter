@@ -1,0 +1,8 @@
+#include "stdlib"
+
+LucasSequence = a -> b -> List::And a $ LucasSequence b $ Nat::Add a b
+FibonacciSequence = LucasSequence 0 1
+
+main = n -> List::Print Nat::PrettyPrint $ List::Take n FibonacciSequence
+
+Main = main 8

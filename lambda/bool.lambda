@@ -1,0 +1,19 @@
+/// Bool: Selects from two options
+///
+/// True: Select the first option
+/// False: Select the second option
+
+/// === Bool Constructors ===
+Bool::True = a -> b -> a
+Bool::False = a -> b -> b
+
+/// === Bool Operations ===
+Bool::Not = bool -> bool Bool::False Bool::True
+Bool::And = a -> b -> a b Bool::False
+Bool::Or = a -> b -> a Bool::True b
+Bool::Nand = a -> b -> Bool::Not $ Bool::And a b
+Bool::Nor = a -> b -> Bool::Not $ Bool::Or a b
+Bool::Xor = a -> b -> Bool::And (Bool::Or a b) (Bool::Nand a b)
+
+/// === Bool Print ===
+Bool::Print = bool -> bool "True" "False"

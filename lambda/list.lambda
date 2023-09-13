@@ -1,0 +1,59 @@
+/// List: singly linked list
+///
+/// Null: empty list
+/// Just elem: singleton list
+/// And elem list: append an element to the front of a list
+/// Join list list: concatenate two lists together
+///
+/// Empty list: determines if a list has a head
+/// Head list: gets the head of a list
+/// Tail list: gets the tail of a list
+/// Get index list: gets an element of a list by its index
+/// Count list: gets the number of elements in a list
+
+#include "bool"
+
+/// === Helper type Tripple ===
+List::_Triple = a -> b -> c -> sel -> sel a b c
+List::_Triple::Fst = tri -> tri $ a -> _ -> _ -> a
+List::_Triple::Snd = tri -> tri $ _ -> a -> _ -> a
+List::_Triple::Trd = tri -> tri $ _ -> _ -> a -> a
+
+/// === List Constructors ===
+List::Null = List::_Triple _ Bool::True _
+List::And = elem -> list -> List::_Triple elem Bool::False list
+List::Just = elem -> List::And elem List::Null
+List::Join = a -> b -> (List::Empty a) b $ List::And (List::Head a) $ List::Join (List::Tail a) b
+
+/// === List Operations ===
+List::Head = list -> List::_Triple::Fst list
+List::Empty = list -> List::_Triple::Snd list
+List::Tail = list -> List::_Triple::Trd list
+List::Count = list -> (List::Empty list) 0 $ Nat::Incr $ List::Count $ List::Tail list
+
+List::Get = index -> list -> (Nat::IsZero index) (List::Head list) $ List::Get (Nat::Decr index) $ List::Tail list
+List::Take = count -> list -> (Nat::IsZero count) List::Null $ List::And head recurse \
+    where   head = List::Head list \
+        ,   recurse = List::Take newCount tail \
+        ,   newCount = Nat::Decr count \
+        ,   tail = List::Tail list
+
+List::Intersperse = elem -> list -> (Bool::Or isEmpty isSingleton) list $ List::And head $ List::And elem recurse \
+    where   isEmpty = List::Empty list \
+        ,   isSingleton = List::Empty tail \
+        ,   recurse = List::Intersperse elem tail \
+        ,   tail = List::Tail list \
+        ,   head = List::Head list
+
+List::Map = func -> list -> isEmpty List::Null $ List::And newHead recurse \
+    where   isEmpty = List::Empty list \
+        ,   newHead = func $ List::Head list \
+        ,   recurse = List::Map func $ List::Tail list
+
+List::Foldl = func -> value -> list -> (List::Empty list) value $ List::Foldl func (func value $ List::Head list) $ List::Tail list
+
+List::RepeatApply = func -> value -> List::And value $ List::RepeatApply func $ func value
+List::Repeat = value -> List::RepeatApply id value
+
+/// === List Print ===
+List::Print = printElem -> list -> "[" (List::Foldl id "" $ List::Intersperse ", " $ List::Map printElem list) "]"
